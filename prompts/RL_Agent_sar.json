@@ -1,0 +1,521 @@
+{
+  "environment_specification": {
+    "name": "DSSAT-RL Irrigation Environment",
+    "description": "Reinforcement Learning environment for optimal irrigation scheduling using DSSAT crop simulation model"
+  },
+  
+  "state_space": {
+    "type": "continuous",
+    "description": "Multi-dimensional continuous state space representing crop-soil-weather-irrigation conditions",
+    "dimensions": 26,
+    "variables_list": [
+      "days_after_planting",
+      "phenological_stage", 
+      "leaf_area_index",
+      "total_biomass",
+      "cumulative_gdd",
+      "soil_water_content_0_30cm",
+      "soil_water_content_30_60cm", 
+      "soil_water_content_60_100cm",
+      "available_water_fraction",
+      "water_stress_factor",
+      "days_since_last_rain",
+      "rainfall_1day",
+      "rainfall_3day", 
+      "rainfall_7day",
+      "temperature_min",
+      "temperature_max",
+      "temperature_avg",
+      "solar_radiation",
+      "reference_et",
+      "forecast_rain_mm",
+      "last_irrigation_amount",
+      "irrigation_amount_t1",
+      "irrigation_amount_t2", 
+      "irrigation_amount_t3",
+      "irrigation_amount_t4",
+      "days_since_last_irrigation",
+      "cumulative_irrigation",
+      "avg_irrigation_frequency",
+      "irrigation_interval_avg"
+    ],
+    
+    "structure": {
+      "crop_variables": {
+        "description": "Current crop growth and development status",
+        "variables": [
+          {
+            "name": "days_after_planting",
+            "description": "Days since planting",
+            "range": [0, 200],
+            "unit": "days"
+          },
+          {
+            "name": "phenological_stage",
+            "description": "Encoded growth stage (emergence=0.1, vegetative=0.3, flowering=0.5, grain_filling=0.7, maturity=1.0)",
+            "range": [0, 1],
+            "unit": "normalized"
+          },
+          {
+            "name": "leaf_area_index",
+            "description": "Leaf area index",
+            "range": [0, 8],
+            "unit": "m²/m²"
+          },
+          {
+            "name": "total_biomass",
+            "description": "Total above-ground biomass",
+            "range": [0, 20000],
+            "unit": "kg/ha"
+          },
+          {
+            "name": "cumulative_gdd",
+            "description": "Cumulative growing degree days",
+            "range": [0, 3000],
+            "unit": "°C-days"
+          }
+        ]
+      },
+      
+      "soil_variables": {
+        "description": "Soil water status and conditions",
+        "variables": [
+          {
+            "name": "soil_water_content_0_30cm",
+            "description": "Volumetric soil water content in 0-30cm layer",
+            "range": [0.1, 0.5],
+            "unit": "m³/m³"
+          },
+          {
+            "name": "soil_water_content_30_60cm",
+            "description": "Volumetric soil water content in 30-60cm layer",
+            "range": [0.1, 0.5],
+            "unit": "m³/m³"
+          },
+          {
+            "name": "soil_water_content_60_100cm",
+            "description": "Volumetric soil water content in 60-100cm layer",
+            "range": [0.1, 0.5],
+            "unit": "m³/m³"
+          },
+          {
+            "name": "available_water_fraction",
+            "description": "Fraction of available water capacity",
+            "range": [0, 1],
+            "unit": "fraction"
+          },
+          {
+            "name": "water_stress_factor",
+            "description": "Water stress factor (0=no stress, 1=severe stress)",
+            "range": [0, 1],
+            "unit": "stress_index"
+          },
+          {
+            "name": "days_since_last_rain",
+            "description": "Days since last significant rainfall (>5mm)",
+            "range": [0, 60],
+            "unit": "days"
+          }
+        ]
+      },
+      
+      "weather_variables": {
+        "description": "Current and recent weather conditions",
+        "variables": [
+          {
+            "name": "rainfall_1day",
+            "description": "Rainfall in the last 1 day",
+            "range": [0, 100],
+            "unit": "mm"
+          },
+          {
+            "name": "rainfall_3day",
+            "description": "Cumulative rainfall in last 3 days",
+            "range": [0, 200],
+            "unit": "mm"
+          },
+          {
+            "name": "rainfall_7day",
+            "description": "Cumulative rainfall in last 7 days",
+            "range": [0, 300],
+            "unit": "mm"
+          },
+          {
+            "name": "temperature_min",
+            "description": "Recent minimum temperature (3-day average)",
+            "range": [0, 40],
+            "unit": "°C"
+          },
+          {
+            "name": "temperature_max",
+            "description": "Recent maximum temperature (3-day average)",
+            "range": [15, 50],
+            "unit": "°C"
+          },
+          {
+            "name": "temperature_avg",
+            "description": "Recent average temperature (3-day average)",
+            "range": [10, 45],
+            "unit": "°C"
+          },
+          {
+            "name": "solar_radiation",
+            "description": "Daily solar radiation",
+            "range": [5, 35],
+            "unit": "MJ/m²/day"
+          },
+          {
+            "name": "reference_et",
+            "description": "Reference evapotranspiration",
+            "range": [1, 12],
+            "unit": "mm/day"
+          },
+          {
+            "name": "forecast_rain_mm",
+            "description": "Forecast rainfall amount for the next day",
+            "range": [0, 200],
+            "unit": "mm"
+          }
+        ]
+      },
+      
+      "irrigation_history_variables": {
+        "description": "Previous irrigation decisions and patterns",
+        "variables": [
+          {
+            "name": "last_irrigation_amount",
+            "description": "Most recent irrigation amount",
+            "range": [0, 100],
+            "unit": "mm"
+          },
+          {
+            "name": "irrigation_amount_t1",
+            "description": "Irrigation amount 1 step ago",
+            "range": [0, 100],
+            "unit": "mm"
+          },
+          {
+            "name": "irrigation_amount_t2",
+            "description": "Irrigation amount 2 steps ago",
+            "range": [0, 100],
+            "unit": "mm"
+          },
+          {
+            "name": "irrigation_amount_t3",
+            "description": "Irrigation amount 3 steps ago",
+            "range": [0, 100],
+            "unit": "mm"
+          },
+          {
+            "name": "irrigation_amount_t4",
+            "description": "Irrigation amount 4 steps ago",
+            "range": [0, 100],
+            "unit": "mm"
+          },
+          {
+            "name": "days_since_last_irrigation",
+            "description": "Days since last irrigation event (>5mm)",
+            "range": [0, 30],
+            "unit": "days"
+          },
+          {
+            "name": "cumulative_irrigation",
+            "description": "Total irrigation applied this season",
+            "range": [0, 1000],
+            "unit": "mm"
+          },
+          {
+            "name": "avg_irrigation_frequency",
+            "description": "Moving average irrigations per week (last 4 weeks)",
+            "range": [0, 7],
+            "unit": "irrigations/week"
+          },
+          {
+            "name": "irrigation_interval_avg",
+            "description": "Average days between irrigation events",
+            "range": [1, 30],
+            "unit": "days"
+          }
+        ]
+      }
+    },
+    
+    "normalization": {
+      "method": "min_max_scaling",
+      "description": "All state variables normalized to [0, 1] range using predefined min/max bounds",
+      "formula": "normalized_value = (raw_value - min_value) / (max_value - min_value)"
+    }
+  },
+  
+  "action_space": {
+    "type": "continuous",
+    "description": "Continuous irrigation amount decision",
+    "dimensions": 1,
+    "structure": {
+      "irrigation_amount": {
+        "description": "Amount of irrigation to apply",
+        "range": [0, 50],
+        "unit": "mm",
+        "constraints": {
+          "physical_limit": "Maximum daily irrigation capacity",
+          "minimum_threshold": 5,
+          "minimum_threshold_description": "Irrigations below 5mm are treated as 0mm",
+          "operational_constraints": [
+            "Maximum 3 irrigations per week",
+            "Minimum 2 days between irrigation events"
+          ]
+        }
+      }
+    },
+    
+    "action_processing": {
+      "clipping": "Clip action to [0, 50] range",
+      "thresholding": "Set action to 0 if below 5mm threshold",
+      "constraint_checking": "Override action to 0 if violates operational constraints"
+    }
+  },
+  
+  "reward_functions": {
+    "type": "step_wise",
+    "description": "Reward calculated and returned at every step",
+    
+    "hyperparameters": {
+      "description": "Tunable hyperparameters for reward function components",
+      "parameters": {
+        "crop_health_weight": {
+          "value": 0.4,
+          "range": [0.1, 0.8],
+          "description": "Weight for crop health reward component",
+          "update_method": "grid_search_or_bayesian_optimization"
+        },
+        "soil_moisture_weight": {
+          "value": 0.3,
+          "range": [0.1, 0.6],
+          "description": "Weight for soil moisture management reward",
+          "update_method": "grid_search_or_bayesian_optimization"
+        },
+        "wue_weight": {
+          "value": 0.2,
+          "range": [0.0, 0.5],
+          "description": "Weight for water use efficiency reward",
+          "update_method": "grid_search_or_bayesian_optimization"
+        },
+        "water_penalty_weight": {
+          "value": 0.1,
+          "range": [0.0, 0.3],
+          "description": "Weight for water conservation penalty",
+          "update_method": "grid_search_or_bayesian_optimization"
+        },
+        "optimal_soil_water_content": {
+          "value": 0.7,
+          "range": [0.5, 0.9],
+          "description": "Target soil water content (fraction of field capacity)",
+          "update_method": "domain_knowledge_or_optimization"
+        },
+        "water_penalty_coefficient": {
+          "value": 0.01,
+          "range": [0.001, 0.05],
+          "description": "Coefficient for irrigation amount penalty",
+          "update_method": "grid_search_or_bayesian_optimization"
+        },
+        "wue_epsilon": {
+          "value": 0.001,
+          "range": [0.0001, 0.01],
+          "description": "Small constant to prevent division by zero in WUE calculation",
+          "update_method": "fixed_or_minimal_tuning"
+        },
+        "wue_max_cap": {
+          "value": 1.0,
+          "range": [0.5, 5.0],
+          "description": "Maximum cap for water use efficiency reward",
+          "update_method": "domain_knowledge_or_optimization"
+        },
+        "critical_stage_multiplier": {
+          "value": 1.5,
+          "range": [1.0, 3.0],
+          "description": "Reward multiplier during critical growth stages",
+          "update_method": "grid_search_or_domain_knowledge"
+        },
+        "default_stage_multiplier": {
+          "value": 1.0,
+          "range": [0.8, 1.2],
+          "description": "Reward multiplier during non-critical growth stages",
+          "update_method": "fixed_or_minimal_tuning"
+        },
+        "stress_threshold": {
+          "value": 0.3,
+          "range": [0.2, 0.6],
+          "description": "Water stress threshold for stress relief bonus",
+          "update_method": "domain_knowledge_or_optimization"
+        },
+        "irrigation_threshold_for_bonus": {
+          "value": 10,
+          "range": [5, 25],
+          "description": "Minimum irrigation amount (mm) required for stress relief bonus",
+          "update_method": "domain_knowledge_or_optimization"
+        },
+        "stress_relief_bonus_amount": {
+          "value": 0.2,
+          "range": [0.05, 0.5],
+          "description": "Bonus reward amount for stress relief",
+          "update_method": "grid_search_or_bayesian_optimization"
+        }
+      }
+    },
+    
+    "hyperparameter_update_strategies": {
+      "description": "Methods for updating hyperparameters during training or between experiments",
+      "strategies": [
+        {
+          "name": "manual_tuning",
+          "description": "Manual adjustment based on training performance",
+          "frequency": "between_experiments"
+        },
+        {
+          "name": "grid_search",
+          "description": "Systematic search over predefined parameter ranges",
+          "frequency": "before_training",
+          "implementation": "sklearn.model_selection.GridSearchCV equivalent"
+        },
+        {
+          "name": "random_search",
+          "description": "Random sampling from parameter ranges",
+          "frequency": "before_training",
+          "implementation": "sklearn.model_selection.RandomizedSearchCV equivalent"
+        },
+        {
+          "name": "bayesian_optimization",
+          "description": "Gaussian process-based optimization of hyperparameters",
+          "frequency": "adaptive_during_training",
+          "implementation": "optuna or hyperopt libraries"
+        },
+        {
+          "name": "evolutionary_optimization",
+          "description": "Genetic algorithm-based parameter evolution",
+          "frequency": "population_based_training",
+          "implementation": "DEAP or custom evolutionary algorithm"
+        },
+        {
+          "name": "curriculum_learning",
+          "description": "Gradual adjustment of parameters during training",
+          "frequency": "adaptive_during_training",
+          "example": "Start with simple rewards, gradually increase complexity"
+        },
+        {
+          "name": "performance_based_adaptation",
+          "description": "Adjust parameters based on training metrics",
+          "frequency": "adaptive_during_training",
+          "triggers": ["convergence_plateau", "poor_sample_efficiency", "unstable_training"]
+        }
+      ]
+    },
+    
+    "primary_reward_function": {
+      "name": "composite_step_reward",
+      "description": "Weighted combination of multiple reward components with tunable hyperparameters",
+      "components": [
+        {
+          "name": "crop_health_reward",
+          "formula": "(1 - water_stress_factor) * crop_health_weight",
+          "range": [0, "crop_health_weight"],
+          "hyperparameter": "crop_health_weight",
+          "description": "Reward for maintaining low water stress"
+        },
+        {
+          "name": "soil_moisture_reward",
+          "formula": "-abs(avg_soil_water_content - optimal_soil_water_content) * soil_moisture_weight",
+          "range": ["-soil_moisture_weight", 0],
+          "hyperparameters": ["soil_moisture_weight", "optimal_soil_water_content"],
+          "description": "Reward for maintaining optimal soil moisture"
+        },
+        {
+          "name": "water_use_efficiency_reward",
+          "formula": "if irrigation_amount > 0: min(daily_biomass_gain / (irrigation_amount + wue_epsilon), wue_max_cap) * wue_weight else: daily_biomass_gain * wue_weight",
+          "range": [0, "wue_weight * wue_max_cap"],
+          "hyperparameters": ["wue_weight", "wue_epsilon", "wue_max_cap"],
+          "description": "Reward for efficient water use relative to growth"
+        },
+        {
+          "name": "water_conservation_penalty",
+          "formula": "-irrigation_amount * water_penalty_coefficient * water_penalty_weight",
+          "range": ["-water_penalty_weight * max_irrigation * water_penalty_coefficient", 0],
+          "hyperparameters": ["water_penalty_weight", "water_penalty_coefficient"],
+          "description": "Penalty proportional to irrigation amount"
+        }
+      ],
+      
+      "modifiers": {
+        "growth_stage_multiplier": {
+          "description": "Multiply reward based on growth stage criticality",
+          "critical_stages": ["flowering", "grain_filling", "pod_filling"],
+          "multiplier": "critical_stage_multiplier",
+          "default_multiplier": "default_stage_multiplier",
+          "hyperparameters": ["critical_stage_multiplier", "default_stage_multiplier"]
+        },
+        "stress_relief_bonus": {
+          "description": "Bonus reward for irrigating during high stress periods",
+          "condition": "water_stress > stress_threshold AND irrigation_amount > irrigation_threshold_for_bonus",
+          "bonus": "stress_relief_bonus_amount",
+          "hyperparameters": ["stress_threshold", "irrigation_threshold_for_bonus", "stress_relief_bonus_amount"]
+        }
+      },
+      
+      "final_formula": "((crop_health + soil_moisture + wue + water_penalty + stress_bonus) * stage_multiplier)",
+      "expected_range": "dynamic_based_on_hyperparameters",
+      "normalization_note": "Consider reward normalization if hyperparameter changes significantly alter reward scale"
+    },
+    
+    "alternative_reward_functions": {
+      "simple_reward": {
+        "name": "simple_daily_reward",
+        "formula": "(1 - water_stress_factor) - (0.02 * irrigation_amount)",
+        "description": "Simplified reward focusing on stress reduction vs water use",
+        "range": [-1.0, 1.0]
+      },
+      
+      "biomass_focused_reward": {
+        "name": "biomass_reward",
+        "formula": "(daily_biomass_gain * 10) - (irrigation_amount * 0.01)",
+        "description": "Direct reward for biomass accumulation with water penalty",
+        "range": [-0.5, 5.0]
+      },
+      
+      "yield_efficiency_reward": {
+        "name": "wue_reward",
+        "formula": "if irrigation_amount > 0: daily_biomass_gain / irrigation_amount else: daily_biomass_gain",
+        "description": "Pure water use efficiency metric",
+        "range": [0, 10.0]
+      }
+    }
+  },
+  
+  "episode_configuration": {
+    "episode_length": {
+      "description": "Full growing season simulation",
+      "typical_range": [90, 150],
+      "unit": "days",
+      "termination_conditions": [
+        "Crop reaches maturity",
+        "Maximum episode length reached",
+        "Crop failure (severe stress for extended period)"
+      ]
+    },
+    
+    "reset_conditions": {
+      "description": "Conditions that trigger environment reset",
+      "triggers": [
+        "Episode completion",
+        "Manual reset call",
+        "Simulation failure"
+      ]
+    }
+  },
+  
+  "implementation_notes": {
+    "state_vector_construction": "Flatten all state variables into single numpy array of length 26",
+    "action_processing": "Apply constraints and thresholds before passing to DSSAT simulation",
+    "reward_computation": "Calculate after each DSSAT simulation step using previous and current states",
+    "normalization_requirements": "All state variables must be normalized before passing to RL agent",
+    "memory_requirements": "Store irrigation history for last 5 actions and relevant statistics"
+  }
+}

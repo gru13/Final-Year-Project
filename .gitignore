@@ -1,0 +1,5 @@
+.venv
+Weather
+dummy
+__pycache__
+*_env_*
