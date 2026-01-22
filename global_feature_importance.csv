@@ -1,0 +1,16 @@
+Feature Name,Global Importance (Avg Impact in mm)
+available_water_fraction,7.6683
+days_since_last_irrigation,3.9259
+soil_water_content_30_60cm,2.4824
+soil_water_content_0_30cm,1.5533
+DAP,1.4222
+soil_water_content_60_100cm,0.8515
+temperature_avg,0.444
+rainfall_7day,0.2926
+total_biomass,0.2844
+leaf_area_index,0.1259
+solar_radiation,0.1091
+forecast,0.0756
+water_stress_factor,0.0717
+days_since_last_rain,0.0541
+phenological_stage,0.0457

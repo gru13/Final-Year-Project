@@ -214,8 +214,8 @@ def create_soil_file(lat: float, lon: float, output_dir: str, soil_id: str, coun
 if __name__ == "__main__":
     # Example usage when running the script directly
     print("Attempting to generate soil profile file from SoilGrids API...")
-    LATITUDE = 12.3811
-    LONGITUDE = 78.9366
+    LATITUDE =  14.2815
+    LONGITUDE = 77.9781
     SOIL_ID = f"SG{str(int(abs(LATITUDE*100))):0>4}{str(int(abs(LONGITUDE*100))):0>4}"
     
     create_soil_file(
